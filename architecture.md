@@ -118,14 +118,40 @@
 
 ## UI/UX Features
 - Modern, professional color scheme
-- Responsive design
+- Responsive design with mobile-first approach
 - Custom scrollbar styling
-- Hover effects for interactive elements
+- Hover effects for interactive elements (desktop)
+- Touch-optimized interactions (mobile)
 - Modal interfaces for tag management
 - Drag-and-drop interface for organization
 - Full-width layouts where appropriate
 - Consistent tag styling across components
 - Visual hierarchy through typography and spacing
+
+## Mobile Optimizations
+1. **Component Layout**
+   - Header overlays sidebar with proper z-indexing (z-30 for header, z-10 for sidebar)
+   - Consistent 64px (h-16) header height across all viewports
+   - Proper spacing in collapsed sidebar state to accommodate header
+   - Full-width layouts for Views and Tags pages
+
+2. **Navigation**
+   - Collapsible sidebar with touch-friendly toggle
+   - Mobile-optimized menu button placement in header
+   - Proper spacing for touch targets (minimum 44px)
+   - Smooth transitions for sidebar collapse/expand
+
+3. **Content Organization**
+   - Scrollable email list with fixed header
+   - Responsive padding and margins using Tailwind's mobile-first classes
+   - Touch-friendly button and interactive element sizes
+   - Clear visual hierarchy maintained across screen sizes
+
+4. **Performance**
+   - Efficient DOM updates for smooth animations
+   - Optimized event handlers for touch interactions
+   - Proper handling of hover states for touch devices
+   - Responsive image loading and scaling
 
 ## Data Management
 - JSON-based email data store
@@ -134,13 +160,21 @@
 - Real-time email count calculations
 
 ## Future Considerations
-1. Email composition
-2. Search functionality implementation
-3. Email actions (archive, delete, etc.)
-4. User settings persistence
-5. Backend integration
-6. Advanced filtering capabilities
-7. Batch operations for emails
-8. Export/import functionality
-9. Mobile responsiveness improvements
-10. Keyboard shortcuts
+- Dark mode
+- defining tags definition for prompting LLMs structured outputs to identify emails as having a specific tag
+- Email actions (archive, delete, etc.)
+- Accessibility features (keyboard navigation, screen readers, etc.)
+- Creating column data model and integration with views and tags
+- defining columns for prompting LLMs structured outputs
+- defining UIs layers associated with columns
+- creating database integration
+- Search functionality
+- Optimized performance for large datasets
+
+- User authentication and account management
+- Email attachments
+- Send emails to LLMs for tagging
+- Get Emails tags from LLMs
+- create logic for associating columns to tags
+- Understand the tags that are associated with views and what columns are associated with those tags based on views
+- Enquire LLMs for structured input for columns

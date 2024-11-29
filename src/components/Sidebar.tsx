@@ -1,133 +1,93 @@
 import React from 'react';
+import { ChevronLeft, ChevronRight, Inbox, Mail, Star, FileEdit, Send, AlertOctagon, Trash2, FileText, Building2, Briefcase, GraduationCap, HomeIcon, CreditCard, Folder } from 'lucide-react';
 import { View } from '../types';
-import { 
-  Inbox,
-  FileText, 
-  Home, 
-  Wallet, 
-  Briefcase, 
-  GraduationCap,
-  Heart,
-  ShoppingBag,
-  Plane,
-  CreditCard,
-  Users,
-  Newspaper,
-  Tag,
-  Settings
-} from 'lucide-react';
 
 interface SidebarProps {
   views: View[];
-  selectedView: string;
-  onSelectView: (view: string) => void;
-  currentPage: string;
+  selectedView: string | null;
+  onViewSelect: (view: string) => void;
+  isCollapsed: boolean;
 }
 
-const getViewIcon = (id: string) => {
-  const icons = {
-    docs: FileText,
-    living: Home,
-    banking: Wallet,
-    work: Briefcase,
-    education: GraduationCap,
-    health: Heart,
-    shopping: ShoppingBag,
-    travel: Plane,
-    subscriptions: CreditCard,
-    personal: Users,
-    newsletters: Newspaper,
-    promos: Tag
+export function Sidebar({ views, selectedView, onViewSelect, isCollapsed }: SidebarProps) {
+  const getViewIcon = (view: string) => {
+    switch (view.toLowerCase()) {
+      case 'docs':
+        return <FileText className="w-4 h-4" />;
+      case 'living':
+        return <HomeIcon className="w-4 h-4" />;
+      case 'banking':
+        return <CreditCard className="w-4 h-4" />;
+      case 'work':
+        return <Briefcase className="w-4 h-4" />;
+      case 'education':
+        return <GraduationCap className="w-4 h-4" />;
+      case 'business':
+        return <Building2 className="w-4 h-4" />;
+      case 'gov':
+        return <Building2 className="w-4 h-4" />;
+      case 'tax':
+        return <FileText className="w-4 h-4" />;
+      case 'health-ins':
+        return <FileText className="w-4 h-4" />;
+      case 'invest':
+        return <CreditCard className="w-4 h-4" />;
+      case 'housing':
+        return <HomeIcon className="w-4 h-4" />;
+      case 'job':
+        return <Briefcase className="w-4 h-4" />;
+      case 'prof':
+        return <Briefcase className="w-4 h-4" />;
+      case 'edu':
+        return <GraduationCap className="w-4 h-4" />;
+      default:
+        return <Folder className="w-4 h-4" />;
+    }
   };
 
-  const IconComponent = icons[id as keyof typeof icons];
-  return IconComponent ? <IconComponent className="w-5 h-5" /> : null;
-};
-
-export function Sidebar({ views, selectedView, onSelectView, currentPage }: SidebarProps) {
-  const topLevelViews = views.filter(view => !view.parentId);
-
-  if (currentPage === 'tags') {
-    return (
-      <aside className="w-64 border-r overflow-y-auto">
-        <div className="p-4">
-          <h3 className="px-3 text-sm font-medium text-gray-500 mb-2">All Tags</h3>
-          {views.map((view) => (
-            <button
-              key={view.id}
-              className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 font-medium flex items-center ${
-                selectedView === view.name ? 'bg-blue-100 text-blue-600' : ''
-              }`}
-              onClick={() => onSelectView(view.name)}
-            >
-              <span className="mr-3">{getViewIcon(view.id)}</span>
-              {view.name}
-            </button>
-          ))}
-        </div>
-      </aside>
-    );
-  }
-
   return (
-    <aside className="w-64 border-r overflow-y-auto">
-      <div className="p-4">
-        {currentPage === 'home' && (
-          <>
-            <button
-              className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 font-medium flex items-center ${
-                selectedView === 'Inbox' ? 'bg-blue-100 text-blue-600' : ''
-              }`}
-              onClick={() => onSelectView('Inbox')}
-            >
-              <Inbox className="w-5 h-5 mr-3" />
-              Inbox
-            </button>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-64'} flex-none bg-white dark:bg-gray-900 border-r dark:border-gray-700 overflow-y-auto transition-all duration-200`}>
+      <nav className="space-y-6 p-4">
+        {/* Inbox Menu Item */}
+        <div>
+          <button
+            onClick={() => onViewSelect('')} // Empty string or null to clear view selection
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 rounded-lg text-sm ${
+              selectedView === null
+                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Inbox className="w-4 h-4" />
+            {!isCollapsed && <span>Inbox</span>}
+          </button>
+        </div>
 
-            <div className="mt-6">
-              <h3 className="px-3 text-sm font-medium text-gray-500 mb-2">Views</h3>
-              {topLevelViews.map((view) => (
-                <button
-                  key={view.id}
-                  className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 font-medium flex items-center ${
-                    selectedView === view.name ? 'bg-blue-100 text-blue-600' : ''
-                  }`}
-                  onClick={() => onSelectView(view.name)}
-                >
-                  <span className="mr-3">{getViewIcon(view.id)}</span>
-                  {view.name}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {currentPage === 'views' && (
-          <>
-            <div className="flex items-center justify-between px-3 mb-4">
-              <h3 className="text-sm font-medium text-gray-500">Views</h3>
-              <button
-                onClick={() => onSelectView('config')}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <Settings className="w-4 h-4 text-gray-500" />
-              </button>
-            </div>
-            {topLevelViews.map((view) => (
+        {/* Views Section */}
+        <div>
+          <div className={`mb-2 ${isCollapsed ? 'text-center' : ''}`}>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {!isCollapsed && 'Views'}
+            </span>
+          </div>
+          <div className="space-y-1">
+            {views.map((view) => (
               <button
                 key={view.id}
-                className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 font-medium flex items-center ${
-                  selectedView === view.name ? 'bg-blue-100 text-blue-600' : ''
+                onClick={() => onViewSelect(view.id)}
+                className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'} px-3 py-2 rounded-lg text-sm ${
+                  selectedView === view.id
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
-                onClick={() => onSelectView(view.name)}
               >
-                <span className="mr-3">{getViewIcon(view.id)}</span>
-                {view.name}
+                {getViewIcon(view.id)}
+                {!isCollapsed && <span>{view.name}</span>}
               </button>
             ))}
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </nav>
     </aside>
   );
 }

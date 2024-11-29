@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, Plus } from 'lucide-react';
 import { Tag } from '../types';
+import tags from '../tags.json';
 
 interface TagSelectorProps {
   existingTags: string[];
@@ -8,107 +9,111 @@ interface TagSelectorProps {
   onSave: (tags: string[]) => void;
   onClose: () => void;
   onAddNewTag?: (tagName: string) => void;
+  className?: string;
 }
 
-export function TagSelector({ existingTags, availableTags, onSave, onClose, onAddNewTag }: TagSelectorProps) {
+export function TagSelector({ existingTags, availableTags, onSave, onClose, onAddNewTag, className = '' }: TagSelectorProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(existingTags);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewTagInput, setShowNewTagInput] = useState(false);
   const [newTagName, setNewTagName] = useState('');
 
-  const filteredTags = availableTags.filter(tag => 
-    tag.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowNewTagInput(false);
+  };
 
   const handleShowNewTagInput = () => {
-    setNewTagName(searchQuery); // Pre-fill with search query
     setShowNewTagInput(true);
+    setNewTagName(searchQuery);
   };
 
   const handleAddNewTag = () => {
     if (newTagName.trim() && onAddNewTag) {
-      const newTag = newTagName.trim();
-      onAddNewTag(newTag);
-      setSelectedTags(prev => [...prev, newTag]);
+      onAddNewTag(newTagName.trim());
+      setSelectedTags([...selectedTags, newTagName.trim()]);
       setNewTagName('');
       setShowNewTagInput(false);
-      setSearchQuery('');
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    if (showNewTagInput) {
-      setShowNewTagInput(false);
-    }
-  };
+  const filteredTags = availableTags.filter(tag =>
+    tag.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-[400px] max-w-full">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold text-text-primary">Select Tags</h2>
+    <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 ${className}`}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[400px] max-w-full">
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Select Tags</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-surface-secondary rounded-full transition-colors"
-            aria-label="Close modal"
+            className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <X className="w-5 h-5 text-secondary" />
+            <X className="w-5 h-5" />
           </button>
         </div>
+
         <div className="p-4">
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary" />
             <input
               type="text"
               placeholder="Search tags..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-              aria-label="Search tags"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg 
+                text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 
+                focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none"
             />
+            <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400 dark:text-gray-500" />
           </div>
 
-          <div className="space-y-2 h-[280px] overflow-y-auto pr-2">
-            {filteredTags.map(tag => (
-              <label 
-                key={tag} 
-                className="flex items-center p-2 hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+          <div className="space-y-1 max-h-[280px] overflow-y-auto pr-2">
+            {filteredTags.map((tag) => (
+              <label
+                key={tag}
+                className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/70 
+                  transition-colors group"
               >
                 <input
                   type="checkbox"
                   checked={selectedTags.includes(tag)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
+                  onChange={() => {
+                    if (!selectedTags.includes(tag)) {
                       setSelectedTags([...selectedTags, tag]);
                     } else {
                       setSelectedTags(selectedTags.filter(t => t !== tag));
                     }
                   }}
-                  className="mr-3 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                  aria-label={`Select ${tag} tag`}
+                  className="mr-3 h-4 w-4 rounded border-gray-300 dark:border-gray-600 
+                    text-blue-500 dark:text-blue-400 
+                    focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
-                <span className="text-text-primary">{tag}</span>
+                <span className="text-gray-900 dark:text-white group-hover:text-gray-900 dark:group-hover:text-white">
+                  {tags.find(t => t.id === tag)?.name || tag}
+                </span>
               </label>
             ))}
 
             {showNewTagInput ? (
               <div className="p-2">
-                <div className="flex items-center gap-2">
+                <div className="flex gap-2">
                   <input
                     type="text"
                     value={newTagName}
                     onChange={(e) => setNewTagName(e.target.value)}
                     placeholder="Enter new tag name"
-                    className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg 
+                      text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 
+                      focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none"
                     autoFocus
-                    aria-label="New tag name"
                   />
                   <button
                     onClick={handleAddNewTag}
                     disabled={!newTagName.trim()}
-                    className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-                    aria-label="Create new tag"
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:hover:bg-blue-400 
+                      text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed 
+                      transition-colors"
                   >
                     Add
                   </button>
@@ -117,8 +122,8 @@ export function TagSelector({ existingTags, availableTags, onSave, onClose, onAd
             ) : (
               <button
                 onClick={handleShowNewTagInput}
-                className="flex items-center w-full p-2 hover:bg-surface-secondary rounded-lg transition-colors text-primary"
-                aria-label="Create new tag"
+                className="flex items-center w-full p-2 text-blue-500 dark:text-blue-400 
+                  hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Tag {searchQuery && `"${searchQuery}"`}
@@ -129,13 +134,15 @@ export function TagSelector({ existingTags, availableTags, onSave, onClose, onAd
           <div className="flex justify-end space-x-2 mt-6">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-text-secondary hover:bg-surface-secondary rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 
+                dark:hover:bg-gray-700/70 rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={() => onSave(selectedTags)}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:hover:bg-blue-400 
+                text-white rounded-lg transition-colors"
             >
               Save
             </button>

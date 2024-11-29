@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { EmailList } from './components/EmailList';
@@ -9,9 +9,10 @@ import { View, Tag, Email } from './types';
 import emailData from './data/emails.json';
 
 function App() {
-  const [selectedView, setSelectedView] = useState('Inbox');
+  const [selectedView, setSelectedView] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState('home');
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth < 768);
   
   const [views, setViews] = useState<View[]>([
     { 
@@ -20,55 +21,73 @@ function App() {
       visible: true,
       conditions: [{ 
         type: 'includes-any',
-        tags: ['Government', 'Tax', 'Health Insurance']
+        tags: ['document', 'official']
       }]
     },
-    { 
-      id: 'living', 
-      name: 'Living & Utilities', 
+    {
+      id: 'living',
+      name: 'Living',
       visible: true,
       conditions: [{
         type: 'includes-any',
-        tags: ['Housing', 'Utilities']
+        tags: ['living', 'home', 'utilities']
       }]
     },
-    { 
-      id: 'banking', 
-      name: 'Banking & Finance', 
+    {
+      id: 'banking',
+      name: 'Banking',
       visible: true,
       conditions: [{
         type: 'includes-any',
-        tags: ['Bank', 'Investment']
+        tags: ['banking', 'finance']
       }]
     },
-    { 
-      id: 'work', 
-      name: 'Work & Career', 
+    {
+      id: 'work',
+      name: 'Work',
       visible: true,
       conditions: [{
         type: 'includes-any',
-        tags: ['Job', 'Professional']
+        tags: ['work']
       }]
     },
-    { 
-      id: 'education', 
-      name: 'Education', 
+    {
+      id: 'education',
+      name: 'Education',
       visible: true,
       conditions: [{
         type: 'includes-any',
-        tags: ['Education']
+        tags: ['education', 'school']
+      }]
+    },
+    {
+      id: 'business',
+      name: 'Business',
+      visible: true,
+      conditions: [{
+        type: 'includes-any',
+        tags: ['business']
       }]
     }
   ]);
 
   const [tags, setTags] = useState<Tag[]>([
+    { id: 'document', name: 'Document' },
+    { id: 'official', name: 'Official' },
+    { id: 'living', name: 'Living' },
+    { id: 'home', name: 'Home' },
+    { id: 'utilities', name: 'Utilities' },
+    { id: 'banking', name: 'Banking' },
+    { id: 'finance', name: 'Finance' },
+    { id: 'work', name: 'Work' },
+    { id: 'education', name: 'Education' },
+    { id: 'school', name: 'School' },
+    { id: 'business', name: 'Business' },
     { id: 'gov', name: 'Government' },
     { id: 'tax', name: 'Tax' },
     { id: 'health-ins', name: 'Health Insurance' },
-    { id: 'banking', name: 'Bank' },
     { id: 'invest', name: 'Investment' },
     { id: 'housing', name: 'Housing' },
-    { id: 'utilities', name: 'Utilities' },
     { id: 'job', name: 'Job' },
     { id: 'prof', name: 'Professional' },
     { id: 'edu', name: 'Education' }
@@ -90,20 +109,41 @@ function App() {
     setTags(updatedTags);
   };
 
+  const handleViewSelect = (view: string) => {
+    setSelectedView(view);
+  };
+
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
     setIsNavMenuOpen(false);
+    if (page === 'home') {
+      setSelectedView(null);
+    }
   };
 
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSidebarCollapsed(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div className="h-screen flex flex-col">
+    <div className="flex flex-col h-screen bg-surface dark:bg-surface-dark">
       <Header 
-        onSelectView={setSelectedView} 
+        onSelectView={handleViewSelect} 
         onMenuClick={() => setIsNavMenuOpen(true)}
       />
       <NavigationMenu
         isOpen={isNavMenuOpen}
         onClose={() => setIsNavMenuOpen(false)}
+        currentPage={currentPage}
         onNavigate={handleNavigate}
       />
       <div className="flex flex-1 overflow-hidden">
@@ -111,8 +151,10 @@ function App() {
           <Sidebar
             views={views.filter(v => v.visible)}
             selectedView={selectedView}
-            onSelectView={setSelectedView}
+            onViewSelect={handleViewSelect}
             currentPage={currentPage}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
           />
         )}
         {currentPage === 'views' ? (
@@ -126,12 +168,15 @@ function App() {
             onUpdateTags={handleUpdateTags}
           />
         ) : (
-          <EmailList 
-            emails={emails}
-            selectedView={selectedView}
-            views={views}
-            getParentView={getTagHierarchy}
-          />
+          <div className="flex-1 md:ml-0 ml-24 overflow-hidden bg-surface dark:bg-surface-dark">
+            <EmailList 
+              emails={emails}
+              selectedView={selectedView}
+              views={views}
+              getParentView={getTagHierarchy}
+              tags={tags}
+            />
+          </div>
         )}
       </div>
     </div>
